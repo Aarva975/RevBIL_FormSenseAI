@@ -71,23 +71,19 @@
     const errorMessage = document.getElementById('errorMessage');
 
     function showError(message) {
-      errorMessage.style.display = 'block';
       errorMessage.textContent = message;
+      errorMessage.style.display = 'block';
     }
 
     function clearError() {
-      errorMessage.style.display = 'none';
       errorMessage.textContent = '';
+      errorMessage.style.display = 'none';
     }
 
     function setLoading(isLoading) {
       submitButton.disabled = isLoading;
+      submitButton.classList.toggle('loading', isLoading);
       submitButton.textContent = isLoading ? 'Registering...' : 'Register';
-      if (isLoading) {
-        registerForm.classList.add('loading');
-      } else {
-        registerForm.classList.remove('loading');
-      }
     }
 
     registerForm.addEventListener('submit', async (e) => {
@@ -100,23 +96,16 @@
       const password = document.getElementById('password').value;
 
       try {
-        console.log('Sending registration request...');
         const res = await fetch(`${API_URL}/api/register`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           },
-          body: JSON.stringify({ 
-            username: username,
-            email: email,
-            password: password 
-          })
+          body: JSON.stringify({ username, email, password })
         });
 
-        console.log('Response status:', res.status);
         const data = await res.json();
-        console.log('Response data:', data);
 
         if (!res.ok) {
           throw new Error(data.error || 'Registration failed');
@@ -125,7 +114,6 @@
         alert('Registration successful! Please login.');
         window.location.href = 'login.html';
       } catch (err) {
-        console.error('Registration error:', err);
         showError(err.message);
         setLoading(false);
       }

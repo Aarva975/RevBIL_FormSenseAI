@@ -27,8 +27,7 @@ console.log('Attempting to connect to MongoDB...');
 mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    ssl: true,
-    sslValidate: true,
+    tlsAllowInvalidCertificates: true,
     retryWrites: true,
     w: 'majority'
 })
@@ -155,14 +154,14 @@ app.post('/api/register', async (req, res) => {
 // User login
 app.post('/api/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { email, password } = req.body;
 
-        if (!username || !password) {
-            return res.status(400).json({ error: 'Username and password are required' });
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
         }
 
-        // Find user
-        const user = await User.findOne({ username });
+        // Find user by email
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
@@ -175,7 +174,7 @@ app.post('/api/login', async (req, res) => {
 
         // Generate token
         const token = jwt.sign(
-            { id: user._id, username: user.username },
+            { id: user._id, email: user.email, username: user.username },
             process.env.JWT_SECRET || 'your-secret-key',
             { expiresIn: '24h' }
         );
