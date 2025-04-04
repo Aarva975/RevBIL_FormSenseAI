@@ -24,7 +24,14 @@ app.use(express.static('public'));
 
 // MongoDB connection with detailed error logging
 console.log('Attempting to connect to MongoDB...');
-mongoose.connect(process.env.MONGODB_URI)
+mongoose.connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    ssl: true,
+    sslValidate: true,
+    retryWrites: true,
+    w: 'majority'
+})
 .then(() => {
     console.log('Successfully connected to MongoDB');
 })
