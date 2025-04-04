@@ -58,6 +58,7 @@ const workoutSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     exercise: { type: String, required: true },
     score: { type: Number, required: true },
+    repCount: { type: Number, required: true },
     date: { type: Date, required: true }
 });
 
@@ -200,16 +201,17 @@ app.get('/api/workout-history', authenticateToken, async (req, res) => {
 // Save workout
 app.post('/api/workout-history', authenticateToken, async (req, res) => {
     try {
-        const { exercise, score, date } = req.body;
+        const { exercise, score, repCount, date } = req.body;
 
-        if (!exercise || !score || !date) {
-            return res.status(400).json({ error: 'Exercise, score, and date are required' });
+        if (!exercise || !score || !repCount || !date) {
+            return res.status(400).json({ error: 'Exercise, score, rep count, and date are required' });
         }
 
         const workout = new Workout({
             userId: req.user.id,
             exercise,
             score,
+            repCount,
             date: new Date(date)
         });
 

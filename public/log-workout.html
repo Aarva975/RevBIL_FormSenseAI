@@ -137,6 +137,7 @@
       }
 
       const exercise = document.getElementById('workoutName').value;
+      const repCount = parseInt(document.getElementById('repCount').value);
       const score = parseInt(document.getElementById('formScore').value);
       const date = document.getElementById('date').value;
 
@@ -151,6 +152,7 @@
           body: JSON.stringify({
             exercise,
             score,
+            repCount,
             date
           })
         });

@@ -34,12 +34,13 @@
           <thead>
             <tr>
               <th>Workout Name</th>
+              <th>Reps</th>
               <th>Form Score</th>
               <th>Date</th>
             </tr>
           </thead>
           <tbody id="tableBody">
-            <tr><td colspan="3">Loading history...</td></tr>
+            <tr><td colspan="4">Loading history...</td></tr>
           </tbody>
         </table>
         <div class="cta-buttons" style="margin-top: 20px;">
@@ -76,13 +77,14 @@
         tableBody.innerHTML = '';
 
         if (!Array.isArray(data) || data.length === 0) {
-          tableBody.innerHTML = '<tr><td colspan="3">No workout history found.</td></tr>';
+          tableBody.innerHTML = '<tr><td colspan="4">No workout history found.</td></tr>';
           return;
         }
 
         data.forEach(entry => {
           const row = `<tr>
               <td>${entry.exercise}</td>
+              <td>${entry.repCount}</td>
               <td>${entry.score}</td>
               <td>${new Date(entry.date).toLocaleDateString()}</td>
           </tr>`;
@@ -90,7 +92,7 @@
         });
       } catch (err) {
         console.error(err);
-        document.getElementById('tableBody').innerHTML = '<tr><td colspan="3">Failed to load history. Please try again later.</td></tr>';
+        document.getElementById('tableBody').innerHTML = '<tr><td colspan="4">Failed to load history. Please try again later.</td></tr>';
       }
     }
 
