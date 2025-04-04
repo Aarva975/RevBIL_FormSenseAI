@@ -10,9 +10,9 @@ dotenv.config();
 
 // CORS configuration
 const corsOptions = {
-    origin: process.env.NODE_ENV === 'production'
-        ? ['https://formsenseai.netlify.app']  // Your actual Netlify domain
-        : ['http://localhost:3000', 'http://localhost:3001'],
+    origin: '*',  // Allow all origins for now
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     credentials: true,
     optionsSuccessStatus: 200
 };

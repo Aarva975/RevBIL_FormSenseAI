@@ -68,7 +68,7 @@
 
   <script>
     // API URL configuration
-    const API_URL = 'https://formsense-backend.onrender.com';
+    const API_URL = 'https://formsenseai-backend.onrender.com';
     
     const loginForm = document.getElementById('loginForm');
     const submitButton = document.getElementById('submitButton');
@@ -105,7 +105,10 @@
       try {
         const res = await fetch(`${API_URL}/api/login`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
           body: JSON.stringify({ username, password })
         });
 

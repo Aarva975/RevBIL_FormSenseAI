@@ -29,15 +29,15 @@
       <h3>Register</h3>
       <form id="registerForm" class="feedback-card">
         <label for="username">Username</label><br>
-        <input type="text" id="username" placeholder="Username" required><br><br>
-
-        <label for="email">Email</label><br>
-        <input type="email" id="email" placeholder="Email" required><br><br>
+        <input type="text" id="username" placeholder="Choose a username" required><br><br>
 
         <label for="password">Password</label><br>
-        <input type="password" id="password" placeholder="Password" required><br><br>
+        <input type="password" id="password" placeholder="Choose a password" required><br><br>
 
         <button type="submit" class="cta-button">Register</button>
+        <p style="margin-top: 15px; text-align: center;">
+          Already have an account? <a href="login.html">Login here</a>
+        </p>
       </form>
     </section>
   </main>
@@ -48,7 +48,7 @@
 
   <script>
     // API URL configuration
-    const API_URL = 'https://formsense-backend.onrender.com';
+    const API_URL = 'https://formsenseai-backend.onrender.com';
 
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -59,8 +59,11 @@
       try {
         const res = await fetch(`${API_URL}/api/register`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: email, password })
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ username, password })  // Using username directly, not email
         });
 
         if (!res.ok) {
