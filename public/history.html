@@ -63,10 +63,11 @@
       }
 
       try {
-        const res = await fetch('http://localhost:5000/history', {
+        const res = await fetch('https://formsenseai-backend.onrender.com/api/workout-history', {
           method: 'GET',
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
           }
         });
 
@@ -74,22 +75,22 @@
         const tableBody = document.getElementById('tableBody');
         tableBody.innerHTML = '';
 
-        if (!data.history || data.history.length === 0) {
+        if (!Array.isArray(data) || data.length === 0) {
           tableBody.innerHTML = '<tr><td colspan="3">No workout history found.</td></tr>';
           return;
         }
 
-        data.history.forEach(entry => {
+        data.forEach(entry => {
           const row = `<tr>
-              <td>${entry.workoutName}</td>
-              <td>${entry.formScore}</td>
-              <td>${entry.date}</td>
+              <td>${entry.exercise}</td>
+              <td>${entry.score}</td>
+              <td>${new Date(entry.date).toLocaleDateString()}</td>
           </tr>`;
           tableBody.innerHTML += row;
         });
       } catch (err) {
         console.error(err);
-        document.getElementById('tableBody').innerHTML = '<tr><td colspan="3">Failed to load history.</td></tr>';
+        document.getElementById('tableBody').innerHTML = '<tr><td colspan="3">Failed to load history. Please try again later.</td></tr>';
       }
     }
 

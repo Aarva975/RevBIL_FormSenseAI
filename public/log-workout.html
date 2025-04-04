@@ -98,11 +98,14 @@
         <input list="exerciseList" id="exerciseSelect" placeholder="Start typing..." required />
         <datalist id="exerciseList"></datalist><br><br>
 
-        <label for="workoutName">Detected Exercise</label><br>
-        <input type="text" id="workoutName" placeholder="Exercise Name" required readonly><br><br>
+        <label for="workoutName">Exercise Name</label><br>
+        <input type="text" id="workoutName" placeholder="Exercise Name" required><br><br>
         
         <label for="repCount">Rep Count</label><br>
-        <input type="number" id="repCount" placeholder="Rep Count" required readonly><br><br>
+        <input type="number" id="repCount" placeholder="Enter rep count" required min="0"><br><br>
+
+        <label for="formScore">Form Score</label><br>
+        <input type="number" id="formScore" placeholder="Form Score (0-100)" required min="0" max="100"><br><br>
 
         <label for="date">Date</label><br>
         <input type="date" id="date" required><br><br>
@@ -117,40 +120,64 @@
   </footer>
   
   <script>
-    // Update rep count in the form when it changes
-    document.addEventListener('DOMContentLoaded', function() {
-      const repCounterDisplay = document.getElementById('repCounterDisplay');
-      const repCountInput = document.getElementById('repCount');
-      const resetRepsButton = document.getElementById('resetRepsButton');
+    // Set today's date as default
+    document.getElementById('date').valueAsDate = new Date();
+
+    // API URL configuration
+    const API_URL = 'https://formsenseai-backend.onrender.com';
+
+    document.getElementById('logForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
       
-      // Create a MutationObserver to watch for changes to the rep counter display
-      const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          if (mutation.type === 'characterData' || mutation.type === 'childList') {
-            const repText = repCounterDisplay.textContent;
-            const repCount = parseInt(repText.match(/\d+/)[0]);
-            repCountInput.value = repCount;
-          }
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please log in to save your workout');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const exercise = document.getElementById('workoutName').value;
+      const score = parseInt(document.getElementById('formScore').value);
+      const date = document.getElementById('date').value;
+
+      try {
+        const res = await fetch(`${API_URL}/api/workout-history`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            exercise,
+            score,
+            date
+          })
         });
-      });
-      
-      // Start observing the rep counter display
-      observer.observe(repCounterDisplay, { 
-        characterData: true, 
-        childList: true, 
-        subtree: true 
-      });
-      
-      // Reset reps button functionality
-      resetRepsButton.addEventListener('click', function() {
-        const currentExercise = document.getElementById('workoutName').value.toLowerCase();
-        if (window.repStates && window.repStates[currentExercise]) {
-          window.repStates[currentExercise].count = 0;
-          window.repStates[currentExercise].lastPosition = null;
-          window.repStates[currentExercise].direction = 'up';
-          window.updateRepCounterDisplay();
+
+        const data = await res.json();
+        
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to save workout');
         }
-      });
+
+        alert('Workout saved successfully!');
+        window.location.href = 'history.html';
+      } catch (err) {
+        alert('Error saving workout: ' + err.message);
+      }
+    });
+
+    // Update workout name when exercise is selected
+    document.getElementById('exerciseSelect').addEventListener('change', (e) => {
+      document.getElementById('workoutName').value = e.target.value;
+    });
+
+    // Allow manual update of rep count
+    document.getElementById('repCount').addEventListener('input', (e) => {
+      const repCount = parseInt(e.target.value) || 0;
+      // Update form score based on rep count (you can adjust this formula)
+      document.getElementById('formScore').value = Math.min(Math.max(repCount * 10, 0), 100);
     });
   </script>
 </body>
