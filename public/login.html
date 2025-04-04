@@ -8,6 +8,20 @@
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    .error-message {
+      color: #ff4444;
+      margin-top: 10px;
+      display: none;
+    }
+    .loading {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+  </style>
 </head>
 
 <body>
@@ -28,13 +42,22 @@
     <section class="webcam-section">
       <h3>Login</h3>
       <form id="loginForm" class="feedback-card">
-        <label for="email">Email</label><br>
-        <input type="text" id="email" placeholder="Email" required><br><br>
+        <div class="form-group">
+          <label for="username">Username</label><br>
+          <input type="text" id="username" placeholder="Enter your username" required><br>
+        </div>
 
-        <label for="password">Password</label><br>
-        <input type="password" id="password" placeholder="Password" required><br><br>
+        <div class="form-group">
+          <label for="password">Password</label><br>
+          <input type="password" id="password" placeholder="Enter your password" required><br>
+        </div>
 
-        <button type="submit" class="cta-button">Login</button>
+        <div id="errorMessage" class="error-message"></div>
+
+        <button type="submit" id="submitButton" class="cta-button">Login</button>
+        <p style="margin-top: 15px; text-align: center;">
+          Don't have an account? <a href="register.html">Register here</a>
+        </p>
       </form>
     </section>
   </main>
@@ -44,24 +67,63 @@
   </footer>
 
   <script>
-    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    // API URL configuration
+    const API_URL = 'https://formsense-backend.onrender.com';
+    
+    const loginForm = document.getElementById('loginForm');
+    const submitButton = document.getElementById('submitButton');
+    const errorMessage = document.getElementById('errorMessage');
+
+    function showError(message) {
+      errorMessage.style.display = 'block';
+      errorMessage.textContent = message;
+    }
+
+    function clearError() {
+      errorMessage.style.display = 'none';
+      errorMessage.textContent = '';
+    }
+
+    function setLoading(isLoading) {
+      submitButton.disabled = isLoading;
+      submitButton.textContent = isLoading ? 'Logging in...' : 'Login';
+      if (isLoading) {
+        loginForm.classList.add('loading');
+      } else {
+        loginForm.classList.remove('loading');
+      }
+    }
+
+    loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value;
+      clearError();
+      setLoading(true);
+
+      const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
 
-      const res = await fetch('http://localhost:3001/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: email, password })
-      });
+      try {
+        const res = await fetch(`${API_URL}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
 
-      const data = await res.json();
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-        alert('Login successful! Redirecting to history...');
-        window.location.href = 'history.html';
-      } else {
-        alert(data.error || 'Login failed. Please try again.');
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Invalid username or password');
+        }
+
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+          window.location.href = 'history.html';
+        } else {
+          throw new Error('Login failed - no token received');
+        }
+      } catch (err) {
+        showError(err.message);
+        setLoading(false);
       }
     });
   </script>
