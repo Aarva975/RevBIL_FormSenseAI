@@ -47,6 +47,9 @@
   </footer>
 
   <script>
+    // Load environment variables
+    const API_URL = window.API_URL || 'http://localhost:3001';
+
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = document.getElementById('username').value;
@@ -54,19 +57,20 @@
       const password = document.getElementById('password').value;
 
       try {
-        const res = await fetch('http://localhost:3001/api/register', {
+        const res = await fetch(`${API_URL}/api/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: email, password })
         });
 
-        const data = await res.json();
-        if (data.message) {
-          alert('Registration successful! Please login.');
-          window.location.href = 'login.html';
-        } else {
-          alert(data.error || 'Registration failed. Please try again.');
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || 'Registration failed');
         }
+
+        const data = await res.json();
+        alert('Registration successful! Please login.');
+        window.location.href = 'login.html';
       } catch (err) {
         alert('Error occurred: ' + err.message);
       }

@@ -8,14 +8,23 @@ const mongoose = require('mongoose');
 // Load environment variables
 dotenv.config();
 
+// CORS configuration
+const corsOptions = {
+    origin: process.env.NODE_ENV === 'production'
+        ? ['https://your-netlify-app.netlify.app']  // Replace with your Netlify domain
+        : ['http://localhost:3000', 'http://localhost:3001'],
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+
 const app = express();
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static('public'));
 
 // MongoDB connection with detailed error logging
 console.log('Attempting to connect to MongoDB...');
-mongoose.connect('mongodb://127.0.0.1:27017/formsense')
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => {
     console.log('Successfully connected to MongoDB');
 })

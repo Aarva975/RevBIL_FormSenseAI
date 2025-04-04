@@ -1,0 +1,15 @@
+[build]
+  base = "frontend"
+  publish = "public"
+  command = "# no build command needed"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[context.production.environment]
+  API_URL = "https://formsense-backend.onrender.com"
+
+[context.development.environment]
+  API_URL = "http://localhost:3001" 
