@@ -8,6 +8,17 @@
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    .error-message {
+      color: #ff4444;
+      margin-top: 10px;
+      display: none;
+    }
+    .loading {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+  </style>
 </head>
 
 <body>
@@ -31,10 +42,15 @@
         <label for="username">Username</label><br>
         <input type="text" id="username" placeholder="Choose a username" required><br><br>
 
+        <label for="email">Email</label><br>
+        <input type="email" id="email" placeholder="Enter your email" required><br><br>
+
         <label for="password">Password</label><br>
         <input type="password" id="password" placeholder="Choose a password" required><br><br>
 
-        <button type="submit" class="cta-button">Register</button>
+        <div id="errorMessage" class="error-message"></div>
+
+        <button type="submit" id="submitButton" class="cta-button">Register</button>
         <p style="margin-top: 15px; text-align: center;">
           Already have an account? <a href="login.html">Login here</a>
         </p>
@@ -49,33 +65,69 @@
   <script>
     // API URL configuration
     const API_URL = 'https://formsenseai-backend.onrender.com';
+    
+    const registerForm = document.getElementById('registerForm');
+    const submitButton = document.getElementById('submitButton');
+    const errorMessage = document.getElementById('errorMessage');
 
-    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    function showError(message) {
+      errorMessage.style.display = 'block';
+      errorMessage.textContent = message;
+    }
+
+    function clearError() {
+      errorMessage.style.display = 'none';
+      errorMessage.textContent = '';
+    }
+
+    function setLoading(isLoading) {
+      submitButton.disabled = isLoading;
+      submitButton.textContent = isLoading ? 'Registering...' : 'Register';
+      if (isLoading) {
+        registerForm.classList.add('loading');
+      } else {
+        registerForm.classList.remove('loading');
+      }
+    }
+
+    registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      clearError();
+      setLoading(true);
+
       const username = document.getElementById('username').value;
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
 
       try {
+        console.log('Sending registration request...');
         const res = await fetch(`${API_URL}/api/register`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           },
-          body: JSON.stringify({ username, password })  // Using username directly, not email
+          body: JSON.stringify({ 
+            username: username,
+            email: email,
+            password: password 
+          })
         });
 
+        console.log('Response status:', res.status);
+        const data = await res.json();
+        console.log('Response data:', data);
+
         if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || 'Registration failed');
+          throw new Error(data.error || 'Registration failed');
         }
 
-        const data = await res.json();
         alert('Registration successful! Please login.');
         window.location.href = 'login.html';
       } catch (err) {
-        alert('Error occurred: ' + err.message);
+        console.error('Registration error:', err);
+        showError(err.message);
+        setLoading(false);
       }
     });
   </script>

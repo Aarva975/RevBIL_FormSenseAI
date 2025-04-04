@@ -41,6 +41,7 @@ mongoose.connection.on('error', err => {
 // User Schema
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
     password: { type: String, required: true }
 });
 
@@ -100,21 +101,26 @@ app.post('/api/register', async (req, res) => {
     try {
         console.log('Registration attempt with data:', {
             username: req.body.username,
+            email: req.body.email,
             passwordLength: req.body.password ? req.body.password.length : 0
         });
 
-        const { username, password } = req.body;
+        const { username, email, password } = req.body;
 
-        if (!username || !password) {
+        if (!username || !email || !password) {
             console.log('Missing required fields');
-            return res.status(400).json({ error: 'Username and password are required' });
+            return res.status(400).json({ error: 'Username, email, and password are required' });
         }
 
         // Check if user already exists
-        const existingUser = await User.findOne({ username });
+        const existingUser = await User.findOne({ $or: [{ username }, { email }] });
         if (existingUser) {
-            console.log('Username already exists:', username);
-            return res.status(400).json({ error: 'Username already exists' });
+            console.log('User already exists:', existingUser.username);
+            return res.status(400).json({ 
+                error: existingUser.username === username ? 
+                    'Username already exists' : 
+                    'Email already registered'
+            });
         }
 
         // Hash password
@@ -124,6 +130,7 @@ app.post('/api/register', async (req, res) => {
         // Create new user
         const user = new User({
             username,
+            email,
             password: hashedPassword
         });
 
